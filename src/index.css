@@ -170,3 +170,29 @@ body {
 .student-list li:last-child {
   border-bottom: none;
 }
+
+.student-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem;
+  border-bottom: 0.0625rem solid #ddd;
+}
+
+.student-entry:last-child {
+  border-bottom: none;
+}
+
+.delete-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+  background-color: darkred;
+}
