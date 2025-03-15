@@ -4,7 +4,7 @@ import "./index.css";
 export default function App() {
   const [view, setView] = useState("add");
   const [students, setStudents] = useState([]);
-  const [formData, setFormData] = useState({ name: "", age: "" });
+  const [formData, setFormData] = useState({ name: "", age: "", email: "" });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -13,10 +13,13 @@ export default function App() {
 
   const handleAddStudent = (e) => {
     e.preventDefault();
-    if (formData.name.trim() !== "") {
+    if (
+      formData.name.trim() !== "" &&
+      formData.email.trim() !== "" &&
+      formData.age !== ""
+    ) {
       setStudents((prev) => [...prev, formData]);
-
-      setFormData({ name: "", age: "" });
+      setFormData({ name: "", age: "", email: "" });
       alert("Your entry is successfully saved!");
     }
   };
@@ -47,7 +50,9 @@ export default function App() {
           <h2>Add Student</h2>
           <form onSubmit={handleAddStudent}>
             <div className="input-group">
-              <label>Name:</label>
+              <label>
+                Name <span style={{ color: "red" }}>*</span>
+              </label>
               <input
                 type="text"
                 name="name"
@@ -57,12 +62,32 @@ export default function App() {
               />
             </div>
             <div className="input-group">
-              <label>Age:</label>
+              <label>
+                Age <span style={{ color: "red" }}>*</span>
+              </label>
               <input
                 type="number"
                 name="age"
                 value={formData.age}
                 onChange={handleInputChange}
+                required
+                min="1"
+                max="50"
+                step="any"
+              />
+            </div>
+            <div className="input-group">
+              <label>
+                Email <span style={{ color: "red" }}>*</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                pattern="(?=.*@)(?=.*\.).+"
+                title="Email must contain '@' and '.'"
               />
             </div>
             <button type="submit" className="submit-button">
@@ -81,9 +106,17 @@ export default function App() {
             <ul className="student-list">
               {students.map((student, index) => (
                 <li key={index} className="student-entry">
-                  <span>
-                    {student.name} {student.age && `- Age: ${student.age}`}
-                  </span>
+                  <div className="student-info">
+                    <p>
+                      <strong>Name:</strong> {student.name}
+                    </p>
+                    <p>
+                      <strong>Age:</strong> {student.age}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {student.email}
+                    </p>
+                  </div>
                   <button
                     className="delete-button"
                     onClick={() => handleDeleteStudent(index)}
