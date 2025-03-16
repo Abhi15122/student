@@ -47,23 +47,26 @@ body {
 
 .nav-button {
   flex: 1;
-  padding: 0.875rem;
+  display: inline-block;
+  padding: 0.875rem 1.5rem;
+  text-decoration: none;
   font-size: 1.25rem;
   border: none;
-  cursor: pointer;
-  background-color: #ddd;
-  transition: 0.3s;
   border-radius: 0.625rem;
-  margin-bottom: 0.5rem;
+  background-color: #535bf2;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  text-align: center;
 }
 
 .nav-button.active {
-  background-color: #646cff;
+  background-color: #535bf2;
   color: white;
 }
 
 .nav-button:hover {
-  background-color: #535bf2;
+  background-color: #1834b0;
   color: white;
 }
 

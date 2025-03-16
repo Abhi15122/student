@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import "./index.css";
 
-export default function App() {
-  const [view, setView] = useState("add");
+function App() {
   const [students, setStudents] = useState([]);
   const [formData, setFormData] = useState({ name: "", age: "", email: "" });
 
@@ -30,105 +30,186 @@ export default function App() {
 
   return (
     <div className="container">
-      <header className="header">
-        <button
-          className={`nav-button ${view === "add" ? "active" : ""}`}
-          onClick={() => setView("add")}
-        >
-          Add
-        </button>
-        <button
-          className={`nav-button ${view === "list" ? "active" : ""}`}
-          onClick={() => setView("list")}
-        >
-          List
-        </button>
-      </header>
+      <Navigation />
+      <Routes>
+        <Route
+          path="/add"
+          element={
+            <AddStudent
+              formData={formData}
+              handleInputChange={handleInputChange}
+              handleAddStudent={handleAddStudent}
+            />
+          }
+        />
+        <Route
+          path="/list"
+          element={
+            <StudentList
+              students={students}
+              handleDeleteStudent={handleDeleteStudent}
+            />
+          }
+        />
+        <Route
+          path="/list/:id"
+          element={<SingleStudent students={students} />}
+        />
+        <Route path="*" element={<DefaultRedirect />} />
+      </Routes>
+    </div>
+  );
+}
 
-      {view === "add" && (
-        <div className="form-container">
-          <h2>Add Student</h2>
-          <form onSubmit={handleAddStudent}>
-            <div className="input-group">
-              <label>
-                Name <span style={{ color: "red" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="input-group">
-              <label>
-                Age <span style={{ color: "red" }}>*</span>
-              </label>
-              <input
-                type="number"
-                name="age"
-                value={formData.age}
-                onChange={handleInputChange}
-                required
-                min="1"
-                max="50"
-                step="any"
-              />
-            </div>
-            <div className="input-group">
-              <label>
-                Email <span style={{ color: "red" }}>*</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                pattern="(?=.*@)(?=.*\.).+"
-                title="Email must contain '@' and '.'"
-              />
-            </div>
-            <button type="submit" className="submit-button">
-              Save
-            </button>
-          </form>
-        </div>
-      )}
+function Navigation() {
+  return (
+    <div className="header">
+      <Link to="/add" className="nav-button">
+        Add
+      </Link>
+      <Link to="/list" className="nav-button">
+        List
+      </Link>
+    </div>
+  );
+}
 
-      {view === "list" && (
-        <div className="list-container">
-          <h2>Student List</h2>
-          {students.length === 0 ? (
-            <p>No students added yet.</p>
-          ) : (
-            <ul className="student-list">
-              {students.map((student, index) => (
-                <li key={index} className="student-entry">
-                  <div className="student-info">
-                    <p>
-                      <strong>Name:</strong> {student.name}
-                    </p>
-                    <p>
-                      <strong>Age:</strong> {student.age}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {student.email}
-                    </p>
-                  </div>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDeleteStudent(index)}
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+function AddStudent({ formData, handleInputChange, handleAddStudent }) {
+  return (
+    <div className="form-container">
+      <h2>Add Student</h2>
+      <form onSubmit={handleAddStudent}>
+        <div className="input-group">
+          <label>
+            Name <span style={{ color: "red" }}>*</span>
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={(e) => {
+              const cleanedValue = e.target.value.replace(/[0-9]/g, "");
+              handleInputChange({
+                target: { name: "name", value: cleanedValue },
+              });
+            }}
+            required
+            title="Name cannot contain any numbers."
+          />
         </div>
+        <div className="input-group">
+          <label>
+            Age <span style={{ color: "red" }}>*</span>
+          </label>
+          <input
+            type="number"
+            name="age"
+            value={formData.age}
+            onChange={handleInputChange}
+            required
+            min="1"
+            max="50"
+            step="any"
+            onKeyDown={(e) => {
+              if (e.key === "e" || e.key === "E") e.preventDefault();
+            }}
+          />
+        </div>
+        <div className="input-group">
+          <label>
+            Email <span style={{ color: "red" }}>*</span>
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+            pattern="(?=.*@)(?=.*\.).+"
+            title="Email must contain both '.' and '@'"
+          />
+        </div>
+        <button type="submit" className="submit-button">
+          Save
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function StudentList({ students, handleDeleteStudent }) {
+  return (
+    <div className="list-container">
+      <h2>Student List</h2>
+      {students.length === 0 ? (
+        <p>No students added yet.</p>
+      ) : (
+        <ul className="student-list">
+          {students.map((student, index) => (
+            <li key={index} className="student-entry">
+              <Link
+                to={`/list/${index + 1}`}
+                style={{ textDecoration: "none", color: "inherit", flex: 1 }}
+              >
+                <div className="student-info">
+                  <p>
+                    <strong>ID:</strong> {index + 1}
+                  </p>
+                  <p>
+                    <strong>Name:</strong> {student.name}
+                  </p>
+                  <p>
+                    <strong>Age:</strong> {student.age}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {student.email}
+                  </p>
+                </div>
+              </Link>
+              <button
+                className="delete-button"
+                onClick={() => handleDeleteStudent(index)}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
 }
+
+function SingleStudent({ students }) {
+  const { id } = useParams();
+  const index = parseInt(id, 10) - 1;
+  const student = students[index];
+  if (!student) return <div>Student not found.</div>;
+  return (
+    <div className="form-container">
+      <h2>Student Details</h2>
+      <p>
+        <strong>ID:</strong> {id}
+      </p>
+      <p>
+        <strong>Name:</strong> {student.name}
+      </p>
+      <p>
+        <strong>Age:</strong> {student.age}
+      </p>
+      <p>
+        <strong>Email:</strong> {student.email}
+      </p>
+    </div>
+  );
+}
+
+function DefaultRedirect() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/add");
+  }, [navigate]);
+  return null;
+}
+
+export default App;
