@@ -3,8 +3,17 @@ import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import "./index.css";
 
 function App() {
+  useEffect(() => {
+    const storedStudents = localStorage.getItem("students");
+    if (storedStudents) {
+      setStudents(JSON.parse(storedStudents));
+    }
+  }, []);
+
   const [students, setStudents] = useState([]);
   const [formData, setFormData] = useState({ name: "", age: "", email: "" });
+
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,9 +27,12 @@ function App() {
       formData.email.trim() !== "" &&
       formData.age !== ""
     ) {
-      setStudents((prev) => [...prev, formData]);
+      const updatedStudents = [...students, formData];
+      setStudents(updatedStudents);
+      localStorage.setItem("students", JSON.stringify(updatedStudents));
       setFormData({ name: "", age: "", email: "" });
       alert("Your entry is successfully saved!");
+      navigate("/list");
     }
   };
 
