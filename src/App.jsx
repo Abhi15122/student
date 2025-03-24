@@ -3,17 +3,19 @@ import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import "./index.css";
 
 function App() {
+  const navigate = useNavigate();
+  const [students, setStudents] = useState([]);
+  const [formData, setFormData] = useState({ name: "", age: "", email: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Load students from localStorage on mount
   useEffect(() => {
     const storedStudents = localStorage.getItem("students");
     if (storedStudents) {
       setStudents(JSON.parse(storedStudents));
     }
   }, []);
-
-  const [students, setStudents] = useState([]);
-  const [formData, setFormData] = useState({ name: "", age: "", email: "" });
-
-  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,22 +29,43 @@ function App() {
       formData.email.trim() !== "" &&
       formData.age !== ""
     ) {
-      const updatedStudents = [...students, formData];
-      setStudents(updatedStudents);
-      localStorage.setItem("students", JSON.stringify(updatedStudents));
-      setFormData({ name: "", age: "", email: "" });
-      alert("Your entry is successfully saved!");
-      navigate("/list");
+      setSuccessMessage(""); // Reset success message
+      setIsLoading(true);
+
+      setTimeout(() => {
+        const updatedStudents = [...students, formData];
+        setStudents(updatedStudents);
+        localStorage.setItem("students", JSON.stringify(updatedStudents));
+
+        setFormData({ name: "", age: "", email: "" });
+        setIsLoading(false);
+
+        setSuccessMessage("Your entry is successfully saved!");
+        setTimeout(() => setSuccessMessage(""), 2000); // Hide success message after 2 seconds
+
+        setTimeout(() => {
+          navigate("/list");
+        }, 200); // Delay navigation slightly
+      }, 1500);
     }
   };
 
   const handleDeleteStudent = (index) => {
-    setStudents((prev) => prev.filter((_, i) => i !== index));
+    const updatedStudents = students.filter((_, i) => i !== index);
+    setStudents(updatedStudents);
+    localStorage.setItem("students", JSON.stringify(updatedStudents));
   };
 
   return (
     <div className="container">
       <Navigation />
+      {successMessage && <div className="success-popup">{successMessage}</div>}
+
+      {isLoading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <Routes>
         <Route
           path="/add"
@@ -196,7 +219,9 @@ function SingleStudent({ students }) {
   const { id } = useParams();
   const index = parseInt(id, 10) - 1;
   const student = students[index];
+
   if (!student) return <div>Student not found.</div>;
+
   return (
     <div className="form-container">
       <h2>Student Details</h2>
